@@ -1,0 +1,10 @@
+setup.py
+jPCA/__init__.py
+jPCA/jPCA.py
+jPCA/regression.py
+jPCA/util.py
+jPCA.egg-info/PKG-INFO
+jPCA.egg-info/SOURCES.txt
+jPCA.egg-info/dependency_links.txt
+jPCA.egg-info/requires.txt
+jPCA.egg-info/top_level.txt
