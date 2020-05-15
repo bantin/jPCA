@@ -79,7 +79,7 @@ def preprocess(datas,
         
         # Reshape to perform PCA on all trials at once.
         X_full = datas.reshape(num_time_bins * num_conditions, num_units)
-        full_data_cov = np.sum(np.diag(np.cov(X_full.T)))
+        full_data_var = np.sum(np.diag(np.cov(X_full.T)))
         pca_variance_captured = None
 
         if pca:
@@ -89,7 +89,7 @@ def preprocess(datas,
             pca_variance_captured = pca.explained_variance_
 
         data_list = [x for x in datas]
-        return data_list, full_data_cov, pca_variance_captured
+        return data_list, full_data_var, pca_variance_captured
 
 def plot_trajectory(ax, x, y, 
                     color="black",
