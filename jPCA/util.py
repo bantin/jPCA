@@ -10,6 +10,87 @@ from matplotlib.collections import LineCollection
 from matplotlib import colors as mcolors
 import matplotlib.patheffects as pe
 
+def preprocess(datas,
+               times,
+               tstart=-50,
+               tend=150,
+               soft_normalize=5,
+               subtract_cc_mean=True,
+               pca=True,
+               num_pcs=6):
+        """
+        Preprocess data for jPCA. 
+        
+        Args
+        ----
+            datas: List of trials, where each element of the list has shape Times x Neurons. 
+                As an example, this might be the output of load_churchland_data()
+                
+            times: List of times for the experiment. Typically, time zero corresponds
+                to a stimulus onset. This list is used for extracting the set of
+                data to be analyzed (see tstart and tend args).
+                
+            tstart: Integer. Starting time for analysis. For example, if times is [-10, 0 , 10]
+                    and tstart=0, then the data returned by this function will start
+                    at index 1.
+                    
+            tend: Integer. Ending time for analysis.
+            
+            soft_normalize: Float or Int. Constant used during soft-normalization preprocessing step.
+                            Adapted from original jPCA matlab code. Normalized firing rate is 
+                            computed by dividing by the range of the unit across all conditions and times
+                            plus the soft_normalize constant: Y_{cij} = (max(Y_{:i:}) - min(Y_{:i:}) + C)
+                            where Y_{cij} is the cth condition, ith neuron, at the jth time bin.
+                            C is the constant provided by soft_normalize. Set C negative to skip the 
+                            soft-normalizing step.
+                            
+            subtract_cc_mean: Boolean. Whether or not to subtract the mean across conditions. Default True.
+            
+            pca: Boolean. True to perform PCA as a preprocessing step. Defaults to True.
+            
+            num_pcs: Int. When pca=True, controls the number of PCs to use. Defaults to 6.
+            
+        Returns
+        -------
+            data_list: List of arrays, each T x N. T will depend on the values
+                passed for tstart and tend. N will be equal to num_pcs if pca=True.
+                Otherwise the dimension of the data will remain unchanged.
+            full_data_variance: Float, variance of original dataset.
+            pca_variance_captured: Array, variance captured by each PC. 
+                                   If pca=False, this is set to None.
+        """
+        datas = np.stack(datas)
+        num_conditions, num_time_bins, num_units = datas.shape
+
+        if soft_normalize > 0:
+            fr_range = np.max(datas, axis=(0,1)) - np.min(datas, axis=(0,1))
+            datas /= (fr_range + soft_normalize)
+            
+        if subtract_cc_mean:
+            cc_mean = np.mean(datas, axis=0)
+            datas -= cc_mean
+
+        # For consistency with the original jPCA matlab code,
+        # we compute PCA using only the analyzed times.
+        idx_start = times.index(tstart)
+        idx_end = times.index(tend) + 1 # Add one so idx is inclusive
+        datas = datas[:, idx_start:idx_end, :]
+        num_time_bins = idx_end - idx_start
+        
+        # Reshape to perform PCA on all trials at once.
+        X_full = datas.reshape(num_time_bins * num_conditions, num_units)
+        full_data_cov = np.sum(np.diag(np.cov(X_full.T)))
+        pca_variance_captured = None
+
+        if pca:
+            pca = PCA(num_pcs)
+            datas = pca.fit_transform(X_full)
+            datas = datas.reshape(num_conditions, num_time_bins, num_pcs)
+            pca_variance_captured = pca.explained_variance_
+
+        data_list = [x for x in datas]
+        return data_list, full_data_cov, pca_variance_captured
+
 def plot_trajectory(ax, x, y, 
                     color="black",
                     outline="black",
