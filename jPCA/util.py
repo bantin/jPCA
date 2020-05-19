@@ -170,12 +170,12 @@ def plot_projections(data_list,
     pca = pca.fit(prep_states)
     rot = pca.components_
 
-    pc1 = np.append(rot[:,0], 0)
-    pc2 = np.append(rot[:, 1], 0)
+    pc1 = np.append(rot[0, :], 0)
+    pc2 = np.append(rot[1, :], 0)
     cross = np.cross(pc1, pc2)
     if cross[2] < 0:
         rot[:, 1] = -rot[:, 1]
-    basis = basis @ rot
+    basis = basis @ rot.T
 
     test_proj = np.concatenate(data_list) @ basis
     if np.max(np.abs(test_proj[:, 1])) > np.max(test_proj[:, 1]):
