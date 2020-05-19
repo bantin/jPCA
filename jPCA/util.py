@@ -170,10 +170,10 @@ def plot_projections(data_list,
     pca = pca.fit(prep_states)
     rot = pca.components_
 
-    pc1 = np.append(rot[:,1], 0)
-    pc2 = np.append(rot[:, 0], 0)
+    pc1 = np.append(rot[:,0], 0)
+    pc2 = np.append(rot[:, 1], 0)
     cross = np.cross(pc1, pc2)
-    if cross[2] > 0:
+    if cross[2] < 0:
         rot[:, 1] = -rot[:, 1]
     basis = basis @ rot
 
