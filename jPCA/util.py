@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import copy
 
 from scipy.io import loadmat
 
@@ -59,7 +60,7 @@ def preprocess(datas,
             pca_variance_captured: Array, variance captured by each PC. 
                                    If pca=False, this is set to None.
         """
-        datas = np.stack(datas)
+        datas = np.stack(datas, axis=0)
         num_conditions, num_time_bins, num_units = datas.shape
 
         if soft_normalize > 0:
@@ -67,19 +68,19 @@ def preprocess(datas,
             datas /= (fr_range + soft_normalize)
             
         if subtract_cc_mean:
-            cc_mean = np.mean(datas, axis=0)
+            cc_mean = np.mean(datas, axis=0, keepdims=True)
             datas -= cc_mean
 
         # For consistency with the original jPCA matlab code,
         # we compute PCA using only the analyzed times.
         idx_start = times.index(tstart)
         idx_end = times.index(tend) + 1 # Add one so idx is inclusive
-        datas = datas[:, idx_start:idx_end, :]
         num_time_bins = idx_end - idx_start
+        datas = datas[:, idx_start:idx_end, :]
         
         # Reshape to perform PCA on all trials at once.
-        X_full = datas.reshape(num_time_bins * num_conditions, num_units)
-        full_data_var = np.sum(np.diag(np.cov(X_full.T)))
+        X_full = np.concatenate(datas)
+        full_data_var = np.sum(np.var(X_full, axis=0))
         pca_variance_captured = None
 
         if pca:
@@ -174,7 +175,7 @@ def plot_projections(data_list,
     pc2 = np.append(rot[1, :], 0)
     cross = np.cross(pc1, pc2)
     if cross[2] < 0:
-        rot[:, 1] = -rot[:, 1]
+        rot[1, :] = -rot[1, :]
     basis = basis @ rot.T
 
     test_proj = np.concatenate(data_list) @ basis

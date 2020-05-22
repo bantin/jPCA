@@ -51,13 +51,16 @@ class JPCA:
         -------
         out: T x num_components project of the data, which should capture rotations
         """
-        def get_var_captured(projected_datas):
-            X_full = np.concatenate(projected_datas)
-            return np.diag(np.cov(X_full.T))
         assert self.jpcs is not None, "Model must be fit before calling jPCA.project."
         out = datas @ self.jpcs
-        var_capt = get_var_captured(out)
+        var_capt = np.var(out, axis=(0,1))
         return out, var_capt
+
+    # def: np.var(x, axis):
+    #   mean = np.mean(x, axis=axis, keepdims=True)
+    #   x_bar = x - mean
+    #   sq_err = np.sum(x_bar**2, axis=axis)
+    #   return sq_err / x.shape[axis]
 
     @ensure_datas_is_list
     def fit(self,
@@ -117,6 +120,7 @@ class JPCA:
             preprocess(datas, times, tstart=tstart, tend=tend, pca=pca,
                        subtract_cc_mean=subtract_cc_mean, num_pcs=num_pcs,
                        **preprocess_kwargs)
+        self.full_data_var = full_data_var
 
         # Estimate X dot via a first difference, and find the best
         # skew_symmetric matrix which explains the data.
