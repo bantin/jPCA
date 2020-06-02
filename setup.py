@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import os
 from distutils.core import setup
-from Cython.Build import cythonize
-from setuptools.extension import Extension
 import numpy as np
 
 setup(name='jPCA',
