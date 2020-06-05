@@ -1,6 +1,8 @@
 # jPCA for Neural Data Analysis in Python
 This is an implementation of the "jPCA" technique from "Neural Population Dynamics During Reaching" by Churchland, Cunningham et al (Nature 2012). It closely mirrors the original MATLAB codepack published by Prof. Churchland. More information about the JPCA technique, and the MATLAB implementation, can be found at: https://churchland.zuckermaninstitute.columbia.edu/content/code
 
+## **WARNING: This package has not been thoroughly tested. On some datasets, the explained variance output by this implementation differs from the original MATLAB Code. Until we can get this sorted out, we only recommend that this be used for initial data exploration, and the original MATLAB code be used for all serious analyses.**
+
 # Installation
 Clone this repo, and navigate to the directory, then try `pip install .` Feel free to reach out with installation issues.
 
