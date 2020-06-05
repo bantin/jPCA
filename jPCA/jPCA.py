@@ -124,9 +124,8 @@ class JPCA:
 
         # Estimate X dot via a first difference, and find the best
         # skew_symmetric matrix which explains the data.
-        X = np.concatenate(processed_datas)
-        X_dot = np.diff(X, axis=0)
-        X = X[:-1]
+        X = np.concatenate([x[:-1] for x in processed_datas])
+        X_dot = np.concatenate([np.diff(x, axis=0) for x in processed_datas])
 
         M_opt = skew_sym_regress(X, X_dot)
         self.jpcs = self._calculate_jpcs(M_opt)
