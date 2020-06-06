@@ -128,6 +128,7 @@ class JPCA:
         X_dot = np.concatenate([np.diff(x, axis=0) for x in processed_datas])
 
         M_opt = skew_sym_regress(X, X_dot)
+        self.M_skew = M_opt
         self.jpcs = self._calculate_jpcs(M_opt)
 
         # Calculate the jpca basis using the eigenvectors of M_opt
