@@ -96,7 +96,9 @@ def plot_trajectory(ax, x, y,
                     color="black",
                     outline="black",
                     circle=True,
-                    arrow=True):
+                    arrow=True,
+                    circle_size=0.05,
+                    arrow_size=0.05):
     """
     Plot a single neural trajectory in a 2D plane.
     
@@ -123,7 +125,7 @@ def plot_trajectory(ax, x, y,
         
     if circle:
         circ = plt.Circle((x[0], y[0]),
-                          radius=0.05, 
+                          radius=circle_size, 
                           facecolor=color,
                           edgecolor="black")
         ax.add_artist(circ)
@@ -136,14 +138,16 @@ def plot_trajectory(ax, x, y,
                   facecolor=color, 
                   edgecolor=outline,
                   length_includes_head=True,
-                  head_width=0.05)
+                  head_width=arrow_size)
 
 def plot_projections(data_list,
                      x_idx=0,
                      y_idx=1,
+                     axis=None,
                      arrows=True,
                      circles=True,
-                     align_prep_state=True):
+                     arrow_size=0.05,
+                     circle_size=0.05):
     """
     Plot trajectories found via jPCA or PCA. 
     
@@ -158,44 +162,26 @@ def plot_projections(data_list,
         sort_colors: True to color trajectories based on the starting x coordinate. This mimics
                      the jPCA matlab toolbox.
     """
-    fig = plt.figure(figsize=(5,5))
+    if axis is None:
+        fig = plt.figure(figsize=(5,5))
+        axis = fig.add_axes([1, 1, 1, 1])
+
     colormap = plt.cm.RdBu
     colors = np.array([colormap(i) for i in np.linspace(0, 1, len(data_list))])
     data_list = [data[:, [x_idx, y_idx]] for data in data_list]
-    basis = np.array([[1, 0], [0,1]])
-    
-    # # Optional: align prep states so that they spread along the horizontal axis.
 
-    prep_states = np.row_stack([data[0] for data in data_list])
-    pca = PCA(n_components=2)
-    pca = pca.fit(prep_states)
-    rot = pca.components_
-
-    pc1 = np.append(rot[0, :], 0)
-    pc2 = np.append(rot[1, :], 0)
-    cross = np.cross(pc1, pc2)
-    if cross[2] < 0:
-        rot[1, :] = -rot[1, :]
-    basis = basis @ rot.T
-
-    test_proj = np.concatenate(data_list) @ basis
-    if np.max(np.abs(test_proj[:, 1])) > np.max(test_proj[:, 1]):
-        basis = -basis
-
-    data_list = data_list @ basis
-    # Sort colors left to right bases on prep states position
-    # on horizontal axis.
     start_x_list = [data[0,0] for data in data_list]
     color_indices = np.argsort(start_x_list)
 
-    ax = plt.gca()
     for i, data in enumerate(np.array(data_list)[color_indices]):
-        plot_trajectory(ax,
+        plot_trajectory(axis,
                         data[:, 0],
                         data[:, 1],
                         color=colors[i],
                         circle=circles,
-                        arrow=arrows)
+                        arrow=arrows,
+                        arrow_size=arrow_size,
+                        circle_size=circle_size)
 
 
 def load_churchland_data(path):
