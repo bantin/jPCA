@@ -24,6 +24,17 @@ class PJPCA(JPCA):
         self.jpcs = None
         self.lds = ssm.LDS(num_neurons,
             num_jpcs, dynamics=dynamics, emissions=emissions)
+
+    def project_covs(self, covs):
+        """ Project the covariances onto the jPCs for visualization
+
+        Returns
+        -------
+        covs: list of num_jpcs x num_jpcs covariance matrices, with state uncertainty at each
+              timestep.
+        """
+        assert self.jpcs is not None, "Model must be fit before calling project_covs."
+        return [self.jpcs @ cov @ self.jpcs.T for cov in covs]
         
     @ensure_datas_is_list
     def fit(self,
@@ -58,11 +69,15 @@ class PJPCA(JPCA):
         # Set jPCS using recovered dynamics matrix.
         self.jpcs = self._calculate_jpcs(self.lds.dynamics.A)
 
-        states = posterior.mean_continuous_states
-        if align_axes_to_data:
-            self.align_jpcs(states)
-        projected, _ = self.project(states)
+        mus = posterior.mean_continuous_states
+        sigmas = [exp[2] for exp in posterior.continuous_expectations]
 
-        return elbo, posterior, projected
+        if align_axes_to_data:
+            self.align_jpcs(mus)
+
+        projected_mus, _ = self.project_states(mus)
+        projected_sigmas = self.project_covs(sigmas)
+
+        return elbo, posterior, projected_mus, projected_sigmas
 
 

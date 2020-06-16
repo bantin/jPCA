@@ -44,7 +44,7 @@ class JPCA:
         such that the preparatory states tend to lie along the X-axis.
         This mirrors the functionality of the MATLAB codepack.
         """
-        projected, _ = self.project(datas, )
+        projected, _ = self.project_states(datas, )
         for k in range(0, self.num_jpcs, 2): 
 
             # The X and Y axis (for plotting) are the standard basis. We are
@@ -71,7 +71,7 @@ class JPCA:
             self.jpcs[:, k:k+2] = self.jpcs[:, k:k+2] @ basis
 
     @ensure_datas_is_list
-    def project(self, datas):
+    def project_states(self, datas):
         """
         Project data into dimensions which capture rotations.
         We assume that rotation_matrix is an orthogonal matrix which was found
@@ -169,7 +169,7 @@ class JPCA:
         if align_axes_to_data:
             self.align_jpcs(processed_datas)
 
-        projected, jpca_var_capt = self.project(processed_datas)
+        projected, jpca_var_capt = self.project_states(processed_datas)
 
         return (projected, 
                 full_data_var,

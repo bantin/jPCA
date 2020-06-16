@@ -93,6 +93,8 @@ def preprocess(datas,
         return data_list, full_data_var, pca_variance_captured
 
 def plot_trajectory(ax, x, y, 
+                    x_err=None,
+                    y_err=None,
                     color="black",
                     outline="black",
                     circle=True,
@@ -121,7 +123,12 @@ def plot_trajectory(ax, x, y,
     """
     ax.plot(x, y,
              color=color,
-             path_effects=[pe.Stroke(linewidth=2, foreground=outline), pe.Normal()])
+             path_effects=[pe.Stroke(linewidth=0.5, foreground=outline), pe.Normal()])
+
+    if x_err is not None: 
+        ax.fill_betweenx(y, x-x_err, x+x_err)
+    if y_err is not None:
+        ax.fill_between(x, y-y_err, y+y_err)
         
     if circle:
         circ = plt.Circle((x[0], y[0]),
@@ -141,6 +148,7 @@ def plot_trajectory(ax, x, y,
                   head_width=arrow_size)
 
 def plot_projections(data_list,
+                     covs=None,
                      x_idx=0,
                      y_idx=1,
                      axis=None,
@@ -174,14 +182,28 @@ def plot_projections(data_list,
     color_indices = np.argsort(start_x_list)
 
     for i, data in enumerate(np.array(data_list)[color_indices]):
-        plot_trajectory(axis,
+        if covs is not None:
+            cov_curr = covs[i]
+            plot_trajectory(axis,
                         data[:, 0],
                         data[:, 1],
+                        x_err=cov_curr[:, x_idx, x_idx],
+                        y_err=cov_curr[:, y_idx, y_idx],
                         color=colors[i],
                         circle=circles,
                         arrow=arrows,
                         arrow_size=arrow_size,
                         circle_size=circle_size)
+
+        else:
+            plot_trajectory(axis,
+                            data[:, 0],
+                            data[:, 1],
+                            color=colors[i],
+                            circle=circles,
+                            arrow=arrows,
+                            arrow_size=arrow_size,
+                            circle_size=circle_size)
 
 
 def load_churchland_data(path):
