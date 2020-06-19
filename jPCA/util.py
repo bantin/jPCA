@@ -73,8 +73,8 @@ def preprocess(datas,
 
         # For consistency with the original jPCA matlab code,
         # we compute PCA using only the analyzed times.
-        idx_start = times.index(tstart)
-        idx_end = times.index(tend) + 1 # Add one so idx is inclusive
+        idx_start = int(np.where(times == tstart)[0])
+        idx_end = int(np.where(times == tend)[0]) + 1 # Add one so idx is inclusive
         num_time_bins = idx_end - idx_start
         datas = datas[:, idx_start:idx_end, :]
         
@@ -146,6 +146,21 @@ def plot_trajectory(ax, x, y,
                   edgecolor=outline,
                   length_includes_head=True,
                   head_width=arrow_size)
+
+def plot_state_with_uncertainty(data,
+                                variance,
+                                times=None,
+                                idxs=(0,),
+                                axis=None):
+    if axis is None:
+        fig = plt.figure(figsize=(5,5))
+        axis = fig.add_axes([1, 1, 1, 1])
+    for idx in idxs:
+        if times is None:
+            times = np.arange(data.shape[0])
+        y = data[:, idx]
+        axis.plot(times, y)
+        axis.fill_between(times, y+variance[:, idx], y-variance[:, idx], alpha=0.5, color="green")
 
 def plot_projections(data_list,
                      covs=None,

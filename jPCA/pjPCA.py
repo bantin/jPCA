@@ -45,22 +45,23 @@ class PJPCA(JPCA):
             tend=-1,
             times=None,
             align_axes_to_data=True,
+            soft_normalize=5,
             **fit_kwargs):
 
         assert isinstance(datas, list), "datas must be a list."
         assert datas, "datas cannot be empty"
-        T = datas[0].shape[1]
+        T = datas[0].shape[0]
         if times is None:
             times = np.arange(T)
             tstart = 0
-            tend = -1
+            tend = times[-1]
 
         # We don't use PCA with the probabilistic version -- the emissions model
         # does that for us.
         processed_datas, full_data_var, _ = \
             preprocess(datas, times, tstart=tstart, tend=tend, pca=False,
                        subtract_cc_mean=subtract_cc_mean, num_pcs=-1,
-                       **fit_kwargs)
+                       soft_normalize=soft_normalize, **fit_kwargs)
         self.full_data_var = full_data_var
 
         # Fit the LDS

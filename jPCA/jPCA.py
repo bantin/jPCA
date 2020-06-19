@@ -143,11 +143,11 @@ class JPCA:
         """
         assert isinstance(datas, list), "datas must be a list."
         assert datas, "datas cannot be empty"
-        T = datas[0].shape[1]
+        T = datas[0].shape[0]
         if times is None:
             times = np.arange(T)
             tstart=0
-            tend=-1
+            tend=times[-1]
 
         processed_datas, full_data_var, pca_var_capt = \
             preprocess(datas, times, tstart=tstart, tend=tend, pca=pca,
