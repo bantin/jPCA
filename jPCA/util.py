@@ -123,7 +123,7 @@ def plot_trajectory(ax, x, y,
     """
     ax.plot(x, y,
              color=color,
-             path_effects=[pe.Stroke(linewidth=0.5, foreground=outline), pe.Normal()])
+             path_effects=[pe.Stroke(linewidth=2, foreground=outline), pe.Normal()])
 
     if x_err is not None: 
         ax.fill_betweenx(y, x-x_err, x+x_err)
@@ -240,7 +240,7 @@ def load_churchland_data(path):
     # but they are formatted strangely -- each element of the times
     # vector is in a separate list.
     datas = None
-    times = [t[0] for t in conditions[0][1]]
+    times = np.array([t[0] for t in conditions[0][1]])
     
     for cond in conditions:
         spikes = cond[0]

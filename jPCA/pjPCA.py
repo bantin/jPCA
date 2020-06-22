@@ -61,7 +61,7 @@ class PJPCA(JPCA):
         processed_datas, full_data_var, _ = \
             preprocess(datas, times, tstart=tstart, tend=tend, pca=False,
                        subtract_cc_mean=subtract_cc_mean, num_pcs=-1,
-                       soft_normalize=soft_normalize, **fit_kwargs)
+                       soft_normalize=soft_normalize)
         self.full_data_var = full_data_var
 
         # Fit the LDS
