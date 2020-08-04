@@ -24,6 +24,10 @@ class PJPCA(JPCA):
         self.jpcs = None
         self.lds = ssm.LDS(num_neurons,
             num_jpcs, dynamics=dynamics, emissions=emissions)
+        if "orthog" in emissions:
+            self.alpha = 0.0 
+        else:
+            self.alpha = 0.5
 
     def project_covs(self, covs):
         """ Project the covariances onto the jPCs for visualization
@@ -65,7 +69,8 @@ class PJPCA(JPCA):
         self.full_data_var = full_data_var
 
         # Fit the LDS
-        elbo, posterior = self.lds.fit(processed_datas, num_iters=num_iters, **fit_kwargs)
+        elbo, posterior = self.lds.fit(processed_datas, num_iters=num_iters,
+            alpha=self.alpha, **fit_kwargs)
 
         # Set jPCS using recovered dynamics matrix.
         self.jpcs = self._calculate_jpcs(self.lds.dynamics.A)
