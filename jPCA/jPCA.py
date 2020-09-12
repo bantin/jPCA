@@ -95,6 +95,25 @@ class JPCA:
     #   return sq_err / x.shape[axis]
 
     @ensure_datas_is_list
+    def calc_r_squared(self, datas):
+        assert self.M_skew is not None, "Must call fit before calculating R-squared."
+        assert self.M_unconstrained is not None, "Must call fit before calculating R-squared."
+
+        # Check how well M_skew predicts X_dot given X
+        X = np.concatenate([x[:-1] for x in datas])
+        X_dot = np.concatenate([np.diff(x, axis=0) for x in datas])
+        X_dot_var = np.sum(X_dot ** 2)
+
+        skew_sym_prederror = X_dot - X @ self.M_skew.T
+        unconstrained_prederror = X_dot - X @ self.M_unconstrained.T
+
+        R2_Mskew = (X_dot_var - np.sum(skew_sym_prederror ** 2)) / X_dot_var
+        R2_unconstrained = (X_dot_var - np.sum(unconstrained_prederror ** 2)) / X_dot_var
+
+        return R2_Mskew, R2_unconstrained
+
+
+    @ensure_datas_is_list
     def fit(self,
             datas,
             pca=True,
@@ -165,6 +184,13 @@ class JPCA:
         self.M_skew = M_opt
         self.jpcs = self._calculate_jpcs(M_opt)
 
+        # Calculate the best unconstrained M and store it. Useful
+        # for later analyses, and for calculating R-squareds.
+        M_unconstrained, _, _, _ = np.linalg.lstsq(X, X_dot, rcond=None)
+        self.M_unconstrained = M_unconstrained.T
+
+        R2_Mskew, R2_unconstrained = self.calc_r_squared(processed_datas)
+
         # Optionally align axes so data is spread along horizontal axes in plots
         if align_axes_to_data:
             self.align_jpcs(processed_datas)
@@ -174,4 +200,6 @@ class JPCA:
         return (projected, 
                 full_data_var,
                 pca_var_capt,
-                jpca_var_capt)
+                jpca_var_capt,
+                R2_Mskew,
+                R2_unconstrained)
