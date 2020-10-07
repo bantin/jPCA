@@ -18,12 +18,20 @@ class PJPCA(JPCA):
     def __init__(self, num_neurons,
                  emissions="gaussian_orthog",
                  dynamics="rotational",
+                 bin_size=1, # Bin size in seconds
                  num_jpcs=6):
         assert num_jpcs % 2 == 0, "num_jpcs must be an even number."
         self.num_jpcs = num_jpcs
         self.jpcs = None
+        if "poisson" in emissions:
+            emission_kwargs = dict(bin_size=bin_size)
+        else:
+            emission_kwargs = {}
+
         self.lds = ssm.LDS(num_neurons,
-            num_jpcs, dynamics=dynamics, emissions=emissions)
+            num_jpcs, dynamics=dynamics,
+            emissions=emissions,
+            emission_kwargs=emission_kwargs)
         if "orthog" in emissions:
             self.alpha = 0.0 
         else:
