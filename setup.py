@@ -4,7 +4,7 @@ from distutils.core import setup
 import numpy as np
 
 setup(name='jPCA',
-      version='0.0.1',
+      version='0.0.2',
       description='jPCA for analyzing neural state trajectories',
       author='Benjamin Antin',
       author_email='benjaminantin1@gmail.com',
